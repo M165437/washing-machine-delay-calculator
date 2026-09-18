@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="nofollow, noindex" />
+  <title>Washing Machine Delay Calculator</title>
+  <script>
+    if ((navigator.language || "").toLowerCase().startsWith("de")) {
+      document.documentElement.lang = "de";
+    }
+  </script>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #17202a;
+      --muted: #667085;
+      --border: #d0d5dd;
+      --accent: #1769e0;
+      --accent-hover: #1259c4;
+      --danger: #b42318;
+      --footer-link: #98a2b3;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #111418;
+        --card: #191d23;
+        --text: #f3f4f6;
+        --muted: #a0a7b2;
+        --border: #343a43;
+        --accent: #4c8df6;
+        --accent-hover: #6aa0f8;
+        --danger: #ff8a80;
+        --footer-link: #667085;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 34rem;
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 1.25rem 1rem 2rem;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 8vw, 2.4rem);
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+    }
+
+    .intro {
+      margin: 0.65rem 0 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .card {
+      margin-top: 1.25rem;
+      padding: 1rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+    }
+
+    form {
+      display: grid;
+      gap: 1rem;
+    }
+
+    label {
+      display: grid;
+      gap: 0.45rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .time-field {
+      justify-items: start;
+    }
+
+    .time-field input[type="time"] {
+      width: 9.5rem;
+      max-width: 100%;
+    }
+
+    input,
+    button {
+      font: inherit;
+    }
+
+    input {
+      width: 100%;
+      min-height: 3.25rem;
+      padding: 0.75rem 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      background: var(--card);
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    input:focus {
+      outline: 3px solid color-mix(in srgb, var(--accent) 25%, transparent);
+      border-color: var(--accent);
+    }
+
+    button {
+      width: 100%;
+      min-height: 3.5rem;
+      margin-top: 0.25rem;
+      padding: 0.9rem 1rem;
+      border: 0;
+      border-radius: 0.8rem;
+      background: var(--accent);
+      color: white;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    @media (hover: hover) {
+      button:hover {
+        background: var(--accent-hover);
+      }
+    }
+
+    .result {
+      margin-top: 1rem;
+      padding: 1.1rem;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      text-align: center;
+    }
+
+    .result-label {
+      color: var(--muted);
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .result strong {
+      display: block;
+      margin-top: 0.3rem;
+      font-size: clamp(3.2rem, 18vw, 5rem);
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.06em;
+    }
+
+    .details {
+      margin: 0.85rem 0 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .error {
+      color: var(--danger);
+      font-weight: 700;
+    }
+
+    footer {
+      margin-top: auto;
+      padding-top: 1.25rem;
+    }
+
+    footer a {
+      color: var(--footer-link);
+      font-size: 0.85rem;
+      text-decoration: none;
+    }
+
+    footer svg {
+      vertical-align: -0.125em;
+    }
+
+    @media (min-width: 40rem) {
+      main {
+        min-height: auto;
+        padding-top: 3rem;
+      }
+
+      .card,
+      .result {
+        padding: 1.25rem;
+      }
+    }
+
+    html[lang="en"] span[lang="de"],
+    html[lang="de"] span[lang="en"] {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <h1>
+      <span lang="de">Waschmaschinen-Vorlaufrechner</span>
+      <span lang="en">Washing Machine Delay Calculator</span>
+    </h1>
+    <p class="intro">
+      <span lang="de">Gib die Dauer des Waschgangs und die gewünschte Fertigzeit ein. Die Seite berechnet daraus den
+        Vorlauf ab jetzt.</span>
+      <span lang="en">Enter the duration of the wash cycle and the desired finish time. The page will calculate the
+        required delay from now.</span>
+    </p>
+
+    <section class="card">
+      <form id="calculator" novalidate>
+        <label class="time-field">
+          <span lang="de">Dauer des Waschgangs</span>
+          <span lang="en">Wash cycle duration</span>
+          <input id="durationTime" name="durationTime" type="time" lang="de-DE" step="60" required />
+        </label>
+
+        <label class="time-field">
+          <span lang="de">Fertig um</span>
+          <span lang="en">Finish at</span>
+          <input id="finishTime" name="finishTime" type="time" lang="de-DE" step="60" required />
+        </label>
+
+        <button type="submit">
+          <span lang="de">Vorlauf berechnen</span>
+          <span lang="en">Calculate delay</span>
+        </button>
+      </form>
+    </section>
+
+    <section class="result" aria-live="polite">
+      <span class="result-label" lang="de">Einzustellender Vorlauf</span>
+      <span class="result-label" lang="en">Delay to set</span>
+      <strong id="delay">--:--</strong>
+      <p id="details" class="details"></p>
+    </section>
+
+    <footer>
+      <a href="https://github.com/M165437/washing-machine-delay-calculator">
+        <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" width="1em" height="1em"
+          viewBox="0 0 24 24">
+          <path fill="currentColor"
+            d="M12 .297c-6.63 0-12 5.373-12 12c0 5.303 3.438 9.8 8.205 11.385c.6.113.82-.258.82-.577c0-.285-.01-1.04-.015-2.04c-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729c1.205.084 1.838 1.236 1.838 1.236c1.07 1.835 2.809 1.305 3.495.998c.108-.776.417-1.305.76-1.605c-2.665-.3-5.466-1.332-5.466-5.93c0-1.31.465-2.38 1.235-3.22c-.135-.303-.54-1.523.105-3.176c0 0 1.005-.322 3.3 1.23c.96-.267 1.98-.399 3-.405c1.02.006 2.04.138 3 .405c2.28-1.552 3.285-1.23 3.285-1.23c.645 1.653.24 2.873.12 3.176c.765.84 1.23 1.91 1.23 3.22c0 4.61-2.805 5.625-5.475 5.92c.42.36.81 1.096.81 2.22c0 1.606-.015 2.896-.015 3.286c0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12">
+          </path>
+        </svg>
+        <span>GitHub</span>
+      </a>
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      var STORAGE_KEY = "washing-machine-delay-calculator-v1";
+      var translations = {
+        en: {
+          title: "Washing Machine Delay Calculator",
+          invalidValues: "Please enter valid values.",
+          invalidDuration: "Please enter a valid wash duration.",
+          invalidFinish: "Please enter a valid finish time.",
+          today: "today",
+          tomorrow: "tomorrow",
+          date: function (value) {
+            return "on " + new Intl.DateTimeFormat("en", {
+              month: "short",
+              day: "numeric"
+            }).format(value);
+          },
+          result: function (day, start, finish) {
+            return "Start around " + day + " at " + start +
+              ", finish at " + finish + ".";
+          }
+        },
+        de: {
+          title: "Waschmaschinen-Vorlaufrechner",
+          invalidValues: "Bitte gültige Werte eingeben.",
+          invalidDuration: "Bitte eine gültige Waschdauer eingeben.",
+          invalidFinish: "Bitte eine gültige Fertigzeit eingeben.",
+          today: "heute",
+          tomorrow: "morgen",
+          date: function (value) {
+            return "am " + pad2(value.getDate()) + "." +
+              pad2(value.getMonth() + 1) + ".";
+          },
+          result: function (day, start, finish) {
+            return "Start ungefähr " + day + " um " + start +
+              ", fertig um " + finish + ".";
+          }
+        }
+      };
+      var messages = translations[document.documentElement.lang] || translations.en;
+
+      document.title = messages.title;
+
+      var durationTime = document.getElementById("durationTime");
+      var finishTime = document.getElementById("finishTime");
+      var delay = document.getElementById("delay");
+      var details = document.getElementById("details");
+      var form = document.getElementById("calculator");
+
+      function pad2(value) {
+        return value < 10 ? "0" + value : String(value);
+      }
+
+      function loadSavedValues() {
+        var defaults = {
+          durationTime: "01:30",
+          finishTime: "18:00"
+        };
+
+        var saved = {};
+
+        try {
+          saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+        } catch (error) {
+          saved = {};
+        }
+
+        durationTime.value =
+          saved.durationTime !== undefined ? saved.durationTime : defaults.durationTime;
+        finishTime.value =
+          saved.finishTime !== undefined ? saved.finishTime : defaults.finishTime;
+      }
+
+      function saveValues() {
+        try {
+          localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({
+              durationTime: durationTime.value,
+              finishTime: finishTime.value
+            })
+          );
+        } catch (error) {
+          // Die Berechnung funktioniert auch dann weiter,
+          // wenn localStorage bei file:// blockiert ist.
+        }
+      }
+
+      function showError(message) {
+        delay.textContent = "--:--";
+        details.textContent = message;
+        details.className = "details error";
+      }
+
+      function calculate() {
+        saveValues();
+
+        if (!form.checkValidity() || !durationTime.value || !finishTime.value) {
+          showError(messages.invalidValues);
+          return;
+        }
+
+        var durationParts = durationTime.value.split(":");
+        var hours = parseInt(durationParts[0], 10);
+        var minutes = parseInt(durationParts[1], 10);
+
+        if (
+          isNaN(hours) ||
+          isNaN(minutes) ||
+          hours < 0 ||
+          minutes < 0 ||
+          minutes > 59 ||
+          (hours === 0 && minutes === 0)
+        ) {
+          showError(messages.invalidDuration);
+          return;
+        }
+
+        var timeParts = finishTime.value.split(":");
+        var finishHour = parseInt(timeParts[0], 10);
+        var finishMinute = parseInt(timeParts[1], 10);
+
+        if (isNaN(finishHour) || isNaN(finishMinute)) {
+          showError(messages.invalidFinish);
+          return;
+        }
+
+        var now = new Date();
+        var finish = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          finishHour,
+          finishMinute,
+          0,
+          0
+        );
+
+        var durationMinutesTotal = hours * 60 + minutes;
+        var durationMs = durationMinutesTotal * 60 * 1000;
+
+        // Reicht die Zeit heute nicht mehr, ist die gewünschte
+        // Fertigzeit automatisch morgen gemeint.
+        if (finish.getTime() - durationMs <= now.getTime()) {
+          finish.setDate(finish.getDate() + 1);
+        }
+
+        var delayMs = finish.getTime() - now.getTime() - durationMs;
+        var totalDelayMinutes = Math.max(
+          0,
+          Math.ceil(delayMs / (60 * 1000))
+        );
+
+        var delayHours = Math.floor(totalDelayMinutes / 60);
+        var delayMinutes = totalDelayMinutes % 60;
+
+        delay.textContent = pad2(delayHours) + ":" + pad2(delayMinutes);
+
+        var startTime = new Date(
+          now.getTime() + totalDelayMinutes * 60 * 1000
+        );
+
+        var tomorrow = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate() + 1
+        );
+
+        var dayLabel =
+          startTime.getFullYear() === now.getFullYear() &&
+            startTime.getMonth() === now.getMonth() &&
+            startTime.getDate() === now.getDate()
+            ? messages.today
+            : startTime.getFullYear() === tomorrow.getFullYear() &&
+              startTime.getMonth() === tomorrow.getMonth() &&
+              startTime.getDate() === tomorrow.getDate()
+              ? messages.tomorrow
+              : messages.date(startTime);
+
+        details.className = "details";
+        details.textContent = messages.result(
+          dayLabel,
+          pad2(startTime.getHours()) + ":" + pad2(startTime.getMinutes()),
+          pad2(finish.getHours()) + ":" + pad2(finish.getMinutes())
+        );
+      }
+
+      loadSavedValues();
+
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        calculate();
+      });
+      durationTime.addEventListener("change", saveValues);
+      finishTime.addEventListener("change", saveValues);
+    })();
+  </script>
+</body>
+
+</html>
